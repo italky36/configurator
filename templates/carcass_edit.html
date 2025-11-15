@@ -1,0 +1,337 @@
+{% extends "layout.html" %}
+{% block content %}
+{% set has_obj = (obj is defined and obj) %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Редактировать {{ model_view.name }}</h3>
+    </div>
+    <div class="card-body border-bottom py-3">
+      {% set form_action = model_view._url_for_edit(request, obj) if has_obj else url_for('admin:create', identity=model_view.identity) %}
+      <form action="{{ form_action }}" method="POST"
+        enctype="multipart/form-data">
+        <div class="row">
+          {% if error %}
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+          {% endif %}
+        </div>
+        <fieldset class="form-fieldset">
+          {% for field in form %}
+          {% set field_name = field.name %}
+          <div class="mb-3 form-group row field-wrapper" data-field-name="{{ field_name }}">
+            {{ field.label(class_="form-label col-sm-2 col-form-label") }}
+            <div class="col-sm-10">
+              {% if field.errors %}
+              {{ field(class_="form-control is-invalid") }}
+              {% else %}
+              {% if field_name == "active" and (request.method == "GET" and not has_obj) %}
+              {{ field(checked=True) }}
+              {% else %}
+              {{ field() }}
+              {% endif %}
+              {% endif %}
+              {% if field_name == "main_image_url" %}
+              <div class="image-preview mt-2" data-preview="main_image_url"></div>
+              {% elif field_name == "gallery_image_urls" %}
+              <div class="gallery-preview mt-2" data-preview="gallery_image_urls"></div>
+              {% elif field_name == "main_image_upload" %}
+              <div class="image-preview mt-2" data-upload-preview="main_image_upload"></div>
+              {% elif field_name == "gallery_uploads" %}
+              <div class="gallery-preview mt-2" data-upload-preview="gallery_uploads"></div>
+              {% endif %}
+              {% for field_error in field.errors %}
+              <div class="invalid-feedback">{{ field_error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </fieldset>
+        <div class="row">
+          <div class="col-md-2">
+            <a href="{{ url_for('admin:list', identity=model_view.identity) }}" class="btn">
+              Отмена
+            </a>
+          </div>
+          <div class="col-md-6">
+            <div class="btn-group flex-wrap" data-toggle="buttons">
+              <button type="submit" name="save" value="Save and continue editing" class="btn">Сохранить</button>
+              <button type="submit" name="save" value="Save" class="btn">Сохранить и выйти</button>
+              <button type="submit" name="save" value="Save and add another" class="btn">Сохранить и добавить ещё</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if has_obj %}
+<div class="col-12 mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Цветовые вариации</h3>
+    </div>
+    <div class="card-body border-bottom">
+      {% set v_error = request.query_params.get("variation_error") %}
+      {% set v_status = request.query_params.get("variation_status") %}
+      {% if v_status == "created" %}
+      <div class="alert alert-success">Вариация успешно добавлена.</div>
+      {% elif v_status == "deleted" %}
+      <div class="alert alert-success">Вариация удалена.</div>
+      {% endif %}
+      {% if v_error == "duplicate" %}
+      <div class="alert alert-danger">Такая комбинация цветов уже существует для этого каркаса.</div>
+      {% endif %}
+
+      {% if obj.design_combinations %}
+      <div class="table-responsive mb-4">
+        <table class="table card-table table-vcenter text-nowrap">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Цвет каркаса</th>
+              <th>Цвет дизайна</th>
+              <th>Главное фото</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for variation in obj.design_combinations %}
+            <tr>
+              <td>{{ variation.id }}</td>
+              <td>{{ variation.carcass_color.name }} ({{ variation.carcass_color.code }})</td>
+              <td>{{ variation.design_color.name }} ({{ variation.design_color.code }})</td>
+              <td>
+                {% if variation.main_image_url %}
+                <a href="{{ variation.main_image_url }}" target="_blank" rel="noopener">
+                  <img src="{{ variation.main_image_url }}" alt="main" style="max-height:80px;">
+                </a>
+                {% else %}
+                <span class="text-muted">Нет изображения</span>
+                {% endif %}
+                {% if variation.gallery_urls %}
+                <div class="small text-muted mt-1">Галерея: {{ variation.gallery_urls|length }}</div>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if variation.is_default %}
+                <span class="badge bg-blue me-2">Основной</span>
+                {% else %}
+                <form method="POST"
+                  action="{{ url_for('admin_set_default_variation', carcass_id=obj.id, variation_id=variation.id) }}"
+                  class="d-inline">
+                  <button class="btn btn-sm btn-outline-primary" type="submit">Сделать основным</button>
+                </form>
+                {% endif %}
+                <form method="POST"
+                  action="{{ url_for('admin_delete_variation', carcass_id=obj.id, variation_id=variation.id) }}">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Удалить</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-muted mb-4">Для этого каркаса ещё нет цветовых вариаций.</div>
+      {% endif %}
+
+      <h4 class="mb-3">Добавить вариацию</h4>
+      <form method="POST" action="{{ url_for('admin_create_variation', carcass_id=obj.id) }}"
+        enctype="multipart/form-data" class="variation-create-form">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="carcassColorSelect">Цвет каркаса</label>
+            <select id="carcassColorSelect" name="carcass_color_id" class="form-select" required>
+              <option value="" selected disabled>Выберите цвет</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="designColorSelect">Цвет дизайна</label>
+            <select id="designColorSelect" name="design_color_id" class="form-select" required>
+              <option value="" selected disabled>Выберите цвет</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Главное изображение</label>
+          <input type="file" class="form-control" name="main_image_upload" accept="image/*">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Галерея (можно выбрать несколько файлов)</label>
+          <input type="file" class="form-control" name="gallery_uploads" accept="image/*" multiple>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" value="true" id="isDefaultVariation" name="is_default">
+          <label class="form-check-label" for="isDefaultVariation">
+            Сделать основным вариантом
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить вариацию</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+  .image-preview img,
+  .gallery-preview img {
+    max-height: 160px;
+    border-radius: 8px;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #dee2e6;
+    padding: 4px;
+    background: #fff;
+  }
+
+  .image-preview,
+  .gallery-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .preview-placeholder {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+</style>
+
+{% if has_obj %}
+<script>
+  (function () {
+    const metaUrl = "/api/meta";
+    const carcassSelect = document.getElementById("carcassColorSelect");
+    const designSelect = document.getElementById("designColorSelect");
+    if (!carcassSelect || !designSelect) {
+      return;
+    }
+
+    function populateSelect(selectEl, items) {
+      items.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = `${item.name} (${item.code})`;
+        selectEl.appendChild(option);
+      });
+    }
+
+    fetch(metaUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        populateSelect(carcassSelect, data.carcass_colors || []);
+        populateSelect(designSelect, data.design_colors || []);
+      })
+      .catch((error) => {
+        console.error("Failed to load colors", error);
+        const warning = document.createElement("div");
+        warning.className = "alert alert-warning mt-2";
+        warning.textContent = "Не удалось загрузить справочник цветов.";
+        carcassSelect.parentElement.appendChild(warning);
+      });
+  })();
+</script>
+{% endif %}
+
+<script>
+  (function () {
+    function byName(name) {
+      return document.querySelector(`[name="${name}"]`);
+    }
+
+    function setContainerContent(container, html) {
+      if (!container) return;
+      container.innerHTML = html || '<div class="preview-placeholder">Нет данных для предпросмотра</div>';
+    }
+
+    function renderMainImage(value, container) {
+      const url = value ? value.trim() : "";
+      if (!url) {
+        setContainerContent(container);
+        return;
+      }
+      setContainerContent(
+        container,
+        `<div><a href="${url}" target="_blank" rel="noopener">
+            <img src="${url}" alt="Предпросмотр">
+          </a></div>`
+      );
+    }
+
+    function parseGallery(value) {
+      if (!value || !value.trim()) {
+        return [];
+      }
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function renderGallery(value, container) {
+      const urls = parseGallery(value);
+      if (!urls.length) {
+        setContainerContent(container);
+        return;
+      }
+      const items = urls
+        .filter(Boolean)
+        .map(
+          (url) =>
+            `<div><a href="${url}" target="_blank" rel="noopener">
+                <img src="${url}" alt="Галерея">
+              </a></div>`
+        )
+        .join("");
+      setContainerContent(container, items);
+    }
+
+    function renderUploadPreview(input, container) {
+      if (!input || !container) return;
+      const files = Array.from(input.files || []);
+      if (!files.length) {
+        setContainerContent(container);
+        return;
+      }
+      const images = files
+        .filter((file) => file.type.startsWith("image/"))
+        .map((file) => {
+          const url = URL.createObjectURL(file);
+          return `<div><img src="${url}" alt="${file.name}"><div class="preview-placeholder">${file.name}</div></div>`;
+        })
+        .join("");
+      setContainerContent(container, images);
+    }
+
+    function bindTextPreview(fieldName, renderer) {
+      const field = byName(fieldName);
+      const container = document.querySelector(`[data-preview="${fieldName}"]`);
+      if (!field || !container) return;
+      const update = () => renderer(field.value, container);
+      update();
+      field.addEventListener("input", update);
+      field.addEventListener("change", update);
+    }
+
+    function bindUploadPreview(fieldName) {
+      const input = byName(fieldName);
+      const container = document.querySelector(`[data-upload-preview="${fieldName}"]`);
+      if (!input || !container) return;
+      const update = () => renderUploadPreview(input, container);
+      input.addEventListener("change", update);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      bindTextPreview("main_image_url", renderMainImage);
+      bindTextPreview("gallery_image_urls", renderGallery);
+      bindUploadPreview("main_image_upload");
+      bindUploadPreview("gallery_uploads");
+    });
+  })();
+</script>
+{% endblock %}

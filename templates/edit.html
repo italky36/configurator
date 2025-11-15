@@ -1,0 +1,190 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Редактировать {{ model_view.name }}</h3>
+    </div>
+    <div class="card-body border-bottom py-3">
+      <form action="{{ model_view._url_for_edit(request, obj) }}" method="POST"
+        enctype="multipart/form-data">
+        <div class="row">
+          {% if error %}
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+          {% endif %}
+        </div>
+        <fieldset class="form-fieldset">
+          {% for field in form %}
+          {% set field_name = field.name %}
+          {% set is_hidden = field.type == "HiddenField" %}
+          {% if is_hidden %}
+          {{ field() }}
+          {% else %}
+          <div class="mb-3 form-group row field-wrapper" data-field-name="{{ field_name }}">
+            {{ field.label(class_="form-label col-sm-2 col-form-label") }}
+            <div class="col-sm-10">
+              {% if field.errors %}
+              {{ field(class_="form-control is-invalid") }}
+              {% else %}
+              {% if field_name == "active" and request.method == "GET" and not obj %}
+              {{ field(checked=True) }}
+              {% else %}
+              {{ field() }}
+              {% endif %}
+              {% endif %}
+              {% if field_name == "main_image_upload" %}
+              <div class="image-preview mt-2" data-upload-preview="main_image_upload"></div>
+              {% elif field_name == "gallery_uploads" %}
+              <div class="gallery-preview mt-2" data-upload-preview="gallery_uploads"></div>
+              {% endif %}
+              {% for error in field.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </fieldset>
+        <div class="row">
+          <div class="col-md-2">
+            <a href="{{ url_for('admin:list', identity=model_view.identity) }}" class="btn">
+              Отмена
+            </a>
+          </div>
+          <div class="col-md-6">
+            <div class="btn-group flex-wrap" data-toggle="buttons">
+              <button type="submit" name="save" value="Save and continue editing" class="btn">Сохранить</button>
+              <button type="submit" name="save" value="Save" class="btn">Сохранить и выйти</button>
+              <button type="submit" name="save" value="Save and add another" class="btn">Сохранить и добавить ещё</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-preview img,
+  .gallery-preview img {
+    max-height: 160px;
+    border-radius: 8px;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #dee2e6;
+    padding: 4px;
+    background: #fff;
+  }
+
+  .image-preview,
+  .gallery-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .preview-placeholder {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+</style>
+
+<script>
+  (function () {
+    function byName(name) {
+      return document.querySelector(`[name="${name}"]`);
+    }
+
+    function setContainerContent(container, html) {
+      if (!container) return;
+      container.innerHTML = html || '<div class="preview-placeholder">Нет данных для предпросмотра</div>';
+    }
+
+    function renderMainImage(value, container) {
+      const url = value ? value.trim() : "";
+      if (!url) {
+        setContainerContent(container);
+        return;
+      }
+      setContainerContent(
+        container,
+        `<div><a href="${url}" target="_blank" rel="noopener">
+            <img src="${url}" alt="Предпросмотр">
+          </a></div>`
+      );
+    }
+
+    function parseGallery(value) {
+      if (!value || !value.trim()) {
+        return [];
+      }
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function renderGallery(value, container) {
+      const urls = parseGallery(value);
+      if (!urls.length) {
+        setContainerContent(container);
+        return;
+      }
+      const items = urls
+        .filter(Boolean)
+        .map(
+          (url) =>
+            `<div><a href="${url}" target="_blank" rel="noopener">
+                <img src="${url}" alt="Галерея">
+              </a></div>`
+        )
+        .join("");
+      setContainerContent(container, items);
+    }
+
+    function renderUploadPreview(input, container) {
+      if (!input || !container) return;
+      const files = Array.from(input.files || []);
+      if (!files.length) {
+        setContainerContent(container);
+        return;
+      }
+      const images = files
+        .filter((file) => file.type.startsWith("image/"))
+        .map((file) => {
+          const url = URL.createObjectURL(file);
+          return `<div><img src="${url}" alt="${file.name}"><div class="preview-placeholder">${file.name}</div></div>`;
+        })
+        .join("");
+      setContainerContent(container, images);
+    }
+
+    function bindTextPreview(fieldName, renderer) {
+      const field = byName(fieldName);
+      const container = document.querySelector(`[data-preview="${fieldName}"]`);
+      if (!field || !container) return;
+      const update = () => renderer(field.value, container);
+      update();
+      field.addEventListener("input", update);
+      field.addEventListener("change", update);
+    }
+
+    function bindUploadPreview(fieldName) {
+      const input = byName(fieldName);
+      const container = document.querySelector(`[data-upload-preview="${fieldName}"]`);
+      if (!input || !container) return;
+      const update = () => renderUploadPreview(input, container);
+      input.addEventListener("change", update);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      bindTextPreview("main_image_url", renderMainImage);
+      bindTextPreview("gallery_image_urls", renderGallery);
+      bindUploadPreview("main_image_upload");
+      bindUploadPreview("gallery_uploads");
+    });
+  })();
+</script>
+{% endblock %}
