@@ -55,6 +55,7 @@ class Fridge(CatalogBase):
 class Carcass(CatalogBase):
     __tablename__ = "carcasses"
 
+    has_syrup: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     design_combinations: Mapped[List["CarcassDesignCombination"]] = relationship(
         "CarcassDesignCombination",
         back_populates="carcass",
@@ -108,6 +109,7 @@ class CarcassDesignCombination(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     main_image_url: Mapped[str | None] = mapped_column(String(500))
     gallery_image_urls: Mapped[str] = mapped_column(Text, default="[]", nullable=False)
+    syrup_image_url: Mapped[str | None] = mapped_column(String(500))
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 

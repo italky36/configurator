@@ -102,13 +102,26 @@
               <td>{{ variation.carcass_color.name }} ({{ variation.carcass_color.code }})</td>
               <td>{{ variation.design_color.name }} ({{ variation.design_color.code }})</td>
               <td>
-                {% if variation.main_image_url %}
-                <a href="{{ variation.main_image_url }}" target="_blank" rel="noopener">
-                  <img src="{{ variation.main_image_url }}" alt="main" style="max-height:80px;">
-                </a>
-                {% else %}
-                <span class="text-muted">Нет изображения</span>
-                {% endif %}
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                  <div>
+                    {% if variation.main_image_url %}
+                    <a href="{{ variation.main_image_url }}" target="_blank" rel="noopener">
+                      <img src="{{ variation.main_image_url }}" alt="main" style="max-height:80px;">
+                    </a>
+                    {% else %}
+                    <span class="text-muted">Нет основного изображения</span>
+                    {% endif %}
+                  </div>
+                  <div>
+                    {% if variation.syrup_image_url %}
+                    <a href="{{ variation.syrup_image_url }}" target="_blank" rel="noopener">
+                      <img src="{{ variation.syrup_image_url }}" alt="syrup" style="max-height:80px;">
+                    </a>
+                    {% else %}
+                    <span class="text-muted">Сироп не задан</span>
+                    {% endif %}
+                  </div>
+                </div>
                 {% if variation.gallery_urls %}
                 <div class="small text-muted mt-1">Галерея: {{ variation.gallery_urls|length }}</div>
                 {% endif %}
@@ -157,6 +170,12 @@
         <div class="mb-3">
           <label class="form-label">Главное изображение</label>
           <input type="file" class="form-control" name="main_image_upload" accept="image/*">
+          <div class="image-preview mt-2" data-upload-preview="main_image_upload"></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Изображение сиропа</label>
+          <input type="file" class="form-control" name="syrup_image_upload" accept="image/*">
+          <div class="image-preview mt-2" data-upload-preview="syrup_image_upload"></div>
         </div>
         <div class="mb-3">
           <label class="form-label">Галерея (можно выбрать несколько файлов)</label>
@@ -330,6 +349,7 @@
       bindTextPreview("main_image_url", renderMainImage);
       bindTextPreview("gallery_image_urls", renderGallery);
       bindUploadPreview("main_image_upload");
+      bindUploadPreview("syrup_image_upload");
       bindUploadPreview("gallery_uploads");
     });
   })();

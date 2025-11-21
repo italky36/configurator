@@ -115,12 +115,13 @@ class MediaUploadMixin:
 
 
     main_upload_field = "main_image_upload"
-
     gallery_upload_field = "gallery_uploads"
+    syrup_upload_field = "syrup_image_upload"
 
     form_overrides = {
         "main_image_url": HiddenField,
         "gallery_image_urls": HiddenField,
+        "syrup_image_url": HiddenField,
     }
 
 
@@ -144,10 +145,17 @@ class MediaUploadMixin:
 
             )
 
+        if hasattr(form_class, "syrup_image_url") and not hasattr(
+            form_class, self.syrup_upload_field
+        ):
+            setattr(
+                form_class,
+                self.syrup_upload_field,
+                ImageUploadField("Загрузить изображение сиропа"),
+            )
+
         if hasattr(form_class, "gallery_image_urls") and not hasattr(
-
             form_class, self.gallery_upload_field
-
         ):
 
             setattr(
@@ -195,14 +203,14 @@ class MediaUploadMixin:
     async def _persist_uploads(self, data: dict, model: Any) -> None:
 
         upload = data.pop(self.main_upload_field, None)
-
         main_url = await self._save_upload(upload)
-
         if main_url:
-
             data["main_image_url"] = main_url
 
-
+        syrup_upload = data.pop(self.syrup_upload_field, None)
+        syrup_url = await self._save_upload(syrup_upload)
+        if syrup_url:
+            data["syrup_image_url"] = syrup_url
 
         gallery_uploads = data.pop(self.gallery_upload_field, None)
 
@@ -282,10 +290,12 @@ class MediaUploadMixin:
 
             return
 
-        for attr in (self.main_upload_field, self.gallery_upload_field):
-
+        for attr in (
+            self.main_upload_field,
+            self.gallery_upload_field,
+            self.syrup_upload_field,
+        ):
             if not hasattr(obj, attr):
-
                 setattr(obj, attr, None)
 
 
@@ -425,27 +435,15 @@ class CatalogModelView(ExcelImportExportMixin, MediaUploadMixin, ModelView):
     }
 
     column_labels = {
-
         "id": "ID",
-
         "name": "Название",
-
-        "name": "Название",
-
-        "name": "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-
-        "short_title": "\u041a\u043e\u0440\u043e\u0442\u043a\u043e\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-
-        "specs": "\u0425\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438",
-
-        "price": "\u0426\u0435\u043d\u0430 (\u20bd)",
-
-        "main_image_url": "URL \u0433\u043b\u0430\u0432\u043d\u043e\u0433\u043e \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044f",
-
-        "gallery_image_urls": "\u0413\u0430\u043b\u0435\u0440\u0435\u044f (JSON)",
-
-        "active": "\u0410\u043a\u0442\u0438\u0432\u043d\u043e",
-
+        "short_title": "Короткое название",
+        "specs": "Характеристики",
+        "price": "Цена (₽)",
+        "has_syrup": "Есть сироп",
+        "main_image_url": "URL главного изображения",
+        "gallery_image_urls": "Галерея (JSON)",
+        "active": "Активно",
     }
 
 
@@ -484,14 +482,20 @@ class CarcassAdmin(CatalogModelView, model=Carcass):
 
         "name",
 
-
         "specs",
 
         "price",
 
+        "has_syrup",
+
         "active",
 
     ]
+
+    column_labels = {
+        **CatalogModelView.column_labels,
+        "has_syrup": "\u0415\u0441\u0442\u044c \u0441\u0438\u0440\u043e\u043f",
+    }
 
     edit_template = "carcass_edit.html"
 
@@ -639,6 +643,8 @@ class CarcassDesignCombinationAdmin(MediaUploadMixin, ModelView, model=CarcassDe
 
         "main_image_url",
 
+        "syrup_image_url",
+
         "gallery_image_urls",
 
         "is_default",
@@ -660,6 +666,8 @@ class CarcassDesignCombinationAdmin(MediaUploadMixin, ModelView, model=CarcassDe
         "design_color": "\u0426\u0432\u0435\u0442 \u0434\u0438\u0437\u0430\u0439\u043d\u0430",
 
         "main_image_url": "URL \u0433\u043b\u0430\u0432\u043d\u043e\u0433\u043e \u0438\u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u044f",
+
+        "syrup_image_url": "URL \u0431\u0443\u0442\u044b\u043b\u043a\u0438 \u0441\u0438\u0440\u043e\u043f\u0430",
 
         "gallery_image_urls": "\u0413\u0430\u043b\u0435\u0440\u0435\u044f (JSON)",
 

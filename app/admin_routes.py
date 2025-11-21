@@ -56,6 +56,7 @@ async def create_variation(
     carcass_color_id: int = Form(...),
     design_color_id: int = Form(...),
     main_image_upload: UploadFile | None = File(None),
+    syrup_image_upload: UploadFile | None = File(None),
     gallery_uploads: List[UploadFile] | UploadFile | None = File(None),
     is_default: bool = Form(False),
     session: AsyncSession = Depends(get_session),
@@ -88,6 +89,7 @@ async def create_variation(
         raise HTTPException(status_code=404, detail="Color not found")
 
     main_url = await _save_optional(main_image_upload)
+    syrup_url = await _save_optional(syrup_image_upload)
     gallery_urls = await _save_gallery(gallery_uploads)
 
     combination = CarcassDesignCombination(
@@ -96,6 +98,7 @@ async def create_variation(
         design_color_id=design_color_id,
         name=f"{carcass.name} · {carcass_color.name} + {design_color.name}",
         main_image_url=main_url,
+        syrup_image_url=syrup_url,
         gallery_image_urls=json.dumps(gallery_urls, ensure_ascii=False),
         is_default=is_default,
     )

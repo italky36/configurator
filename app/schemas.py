@@ -64,11 +64,13 @@ class CarcassVariationSchema(BaseModel):
     design_color: ColorRefSchema
     main_image_url: str | None = None
     gallery_image_urls: List[str] = Field(default_factory=list)
+    syrup_image_url: str | None = None
     active: bool
     is_default: bool
 
 
 class CarcassSchema(BaseCatalogSchema):
+    has_syrup: bool = False
     variations: List[CarcassVariationSchema] = Field(default_factory=list)
 
 

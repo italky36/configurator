@@ -1,0 +1,398 @@
+<style>
+  .cz-conf {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fff;
+    color: #000;
+    padding: 40px 20px;
+  }
+
+  .cz-conf * {
+    box-sizing: border-box;
+  }
+
+  .cz-conf h1 {
+    margin: 0;
+    padding: 0;
+  }
+
+  .cz-conf .container {
+    max-width: 1470px;
+    margin: 0 auto;
+  }
+
+  .cz-conf h1 {
+    font-size: 35px;
+    font-weight: 600;
+    line-height: 40px;
+    margin: 0 0 40px 0;
+    color: #000000;
+    -webkit-font-smoothing: antialiased;
+    word-break: normal;
+  }
+
+  .cz-conf .main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+    background: #f7f7f7;
+    padding: 40px;
+    border-radius: 8px;
+  }
+
+  .cz-conf .product-image {
+    background: #fff;
+    border-radius: 8px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 550px;
+  }
+
+  .cz-conf .product-image img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .cz-conf .arrow {
+    position: absolute;
+    font-size: 48px;
+    color: #999;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s;
+  }
+
+  .cz-conf .arrow:hover {
+    color: #000;
+  }
+
+  .cz-conf .arrow-left {
+    left: 20px;
+  }
+
+  .cz-conf .arrow-right {
+    right: 20px;
+  }
+
+  .cz-conf .specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  .cz-conf .specs-column {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .cz-conf .spec-block {
+    padding-bottom: 0;
+  }
+
+  .cz-conf .spec-title {
+    color: #999;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .cz-conf .spec-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .cz-conf .spec-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cz-conf .spec-list li {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .cz-conf .spec-list li:before {
+    content: "• ";
+    color: #000;
+    font-weight: bold;
+  }
+
+  .cz-conf .configurator-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 40px;
+    margin-bottom: 60px;
+    align-items: start;
+  }
+
+  .cz-conf .configurator {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .cz-conf .config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cz-conf .config-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .cz-conf .config-select {
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 16px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .cz-conf .config-select:hover {
+    border-color: #999;
+  }
+
+  .cz-conf .config-select:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .cz-conf .price-section {
+    display: contents;
+  }
+
+  .cz-conf .price-block {
+    text-align: center;
+    min-width: 260px;
+  }
+
+  .cz-conf .price {
+    font-size: 64px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .cz-conf .price.sale {
+    color: #0066FF;
+  }
+
+  .cz-conf .price.regular {
+    color: #000;
+  }
+
+  .cz-conf .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 40px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.55;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    width: 100%;
+    text-decoration: none;
+    outline: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .cz-conf .btn-primary {
+    background-color: #0064fc;
+    color: #ffffff;
+    border-color: transparent;
+    border-style: solid;
+  }
+
+  .cz-conf .btn-primary:hover {
+    background-color: #0052d4;
+  }
+
+  .cz-conf .btn-secondary {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #000;
+  }
+
+  .cz-conf .btn-secondary:hover {
+    background-color: #000;
+    color: #fff;
+  }
+
+  @media (max-width: 968px) {
+    .cz-conf .main-content,
+    .cz-conf .configurator-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .cz-conf .configurator {
+      grid-template-columns: 1fr;
+    }
+
+    .cz-conf h1 {
+      font-size: 28px;
+      line-height: 32px;
+    }
+
+    .cz-conf .price {
+      font-size: 48px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cz-conf .specs {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="cz-conf">
+  <div class="container">
+    <h1>Конфигуратор</h1>
+
+    <div class="main-content">
+      <div class="product-image">
+        <span class="arrow arrow-left">‹</span>
+        <!-- сюда воткнёшь картинку кофематча -->
+        <div style="text-align: center; color: #999; font-size: 18px;">
+          Изображение кофемашины
+        </div>
+        <span class="arrow arrow-right">›</span>
+      </div>
+
+      <div class="specs">
+        <div class="specs-column">
+          <div class="spec-block">
+            <div class="spec-title">Кофемашина</div>
+            <div class="spec-name">JETINNO JL36A-ST-MW</div>
+            <ul class="spec-list">
+              <li>10" тачскрин (горизонтальный)</li>
+              <li>Кофегруппа до 20 гр</li>
+              <li>Кофемолка Jetinno SGH64</li>
+              <li>1 контейнер зерен (1200 г)</li>
+              <li>Капучинатор Venturi</li>
+              <li>Замки бункера кофе и бака воды</li>
+              <li>Подключение водопровода</li>
+              <li>Амбиент подсветка</li>
+              <li>Термоблок 1500W</li>
+              <li>Бойлер пара: Термоблок 1300W</li>
+            </ul>
+          </div>
+
+          <div class="spec-block">
+            <div class="spec-title">Каркас</div>
+            <div class="spec-name">COFFEE ZONE MINI</div>
+            <ul class="spec-list">
+              <li>Органайзер для размешивателей</li>
+              <li>Кодовый замок для доступа</li>
+              <li>Канистра для дренажа 10 литров</li>
+              <li>650(Ш)х940(В)х500(Г) мм</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="specs-column">
+          <div class="spec-block">
+            <div class="spec-title">Холодильник</div>
+            <div class="spec-name">MC6D-B</div>
+            <ul class="spec-list">
+              <li>Компрессорный</li>
+              <li>Сенсорное управление</li>
+              <li>Общий объем камеры 6.5 л</li>
+              <li>Объем контейнера молока 3.8 л</li>
+              <li>Хладагент R134A</li>
+              <li>Датчик температуры</li>
+              <li>Датчик наличия молока</li>
+              <li>Температура от 0° до 5° C</li>
+              <li>Время охлаждения - 30 мин</li>
+              <li>220(ш)х395(в)х385(г) мм</li>
+            </ul>
+          </div>
+
+          <div class="spec-block">
+            <div class="spec-title">Терминал</div>
+            <div class="spec-name">VENDISTA V2.5</div>
+            <ul class="spec-list">
+              <li>Питание: 5-40V, 2A, 10W max</li>
+              <li>LCD 2.4" (240 х 320)</li>
+              <li>Аккумулятор 350 mAh</li>
+              <li>78(ш)х85(в)х22(г) мм</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="configurator-wrapper">
+      <div class="configurator">
+        <div class="config-item">
+          <label class="config-label">Кофемашина</label>
+          <select class="config-select">
+            <option>JL15 VIVA-ST-MV</option>
+          </select>
+        </div>
+
+        <div class="config-item">
+          <label class="config-label">Холодильник</label>
+          <select class="config-select">
+            <option>MC6D-B</option>
+          </select>
+        </div>
+
+        <div class="config-item">
+          <label class="config-label">Терминал</label>
+          <select class="config-select">
+            <option>Нет</option>
+          </select>
+        </div>
+
+        <div class="config-item">
+          <label class="config-label">Каркас</label>
+          <select class="config-select">
+            <option>Нет</option>
+          </select>
+        </div>
+
+        <div class="config-item">
+          <label class="config-label">Цвет каркаса</label>
+          <select class="config-select" disabled>
+            <option>Чёрный</option>
+          </select>
+        </div>
+
+        <div class="config-item">
+          <label class="config-label">Цвет дизайна</label>
+          <select class="config-select" disabled>
+            <option>Синий</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="price-section">
+        <div class="price-block">
+          <div class="price sale">189 744₽</div>
+          <button class="btn btn-primary">В наличии на OZON</button>
+        </div>
+
+        <div class="price-block">
+          <div class="price regular">173 000₽</div>
+          <button class="btn btn-secondary">Запросить счёт</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

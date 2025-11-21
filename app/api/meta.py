@@ -68,6 +68,8 @@ def _catalog_schema(item, schema_cls, request: Request):
     }
     if hasattr(item, "short_title"):
         payload["short_title"] = getattr(item, "short_title")
+    if hasattr(item, "has_syrup"):
+        payload["has_syrup"] = bool(getattr(item, "has_syrup"))
     return schema_cls(**payload)
 
 
@@ -112,6 +114,7 @@ async def _load_variations(
                 design_color=design_color,
                 main_image_url=_absolute_url(combo.main_image_url, request),
                 gallery_image_urls=_absolute_gallery(parse_gallery(combo.gallery_image_urls), request),
+                syrup_image_url=_absolute_url(getattr(combo, "syrup_image_url", None), request),
                 active=combo.active,
                 is_default=combo.is_default,
             )
